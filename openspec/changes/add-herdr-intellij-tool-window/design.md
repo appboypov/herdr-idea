@@ -9,7 +9,7 @@ Observed facts this design rests on:
   - it registers an `IdeEventQueue.EventDispatcher` while the terminal has focus;
   - it lets a small allow-list of IDE actions through;
   - it sends every other key to the pty, and uses a `KeyListener` fallback for keys the action system did not consume.
-- **libghostty-vt.** Checked at Ghostty `4ae9f1a2`, 2026-09-22. It is a C API built with Zig 0.15 and provides:
+- **libghostty-vt.** Checked at Ghostty `4ae9f1a2`, 2026-09-22. It is a C API built with Zig 0.16 and provides:
   - `ghostty_terminal_*`: VT parsing and screen state;
   - `ghostty_render_state_*`: incremental render state, with row and cell iterators and a dirty-row iterator;
   - `ghostty_key_encoder_*` and `ghostty_mouse_encoder_*`, with `setopt_from_terminal` so the encoding follows the modes the running program enabled, such as the Kitty keyboard protocol and mouse tracking;
@@ -38,7 +38,7 @@ Diagram format: plain Mermaid, lightweight C4-inspired (container, component, on
 - Reading Ghostty's user config, or matching Ghostty's GPU renderer, ligatures or shaders.
 - Windows support.
 - Managing Herdr panes, agents or the Herdr server beyond starting clients and creating named sessions.
-- A CLI for the plugin. IDE actions are the only entry points; nothing asked for a CLI.
+- A separate CLI program for the plugin. Programs outside the IDE reach the panel's named actions through the dispatcher in D7.
 - Kitty graphics, sixel and images.
 
 ## Decisions
@@ -84,13 +84,22 @@ A claimed event is encoded with `ghostty_key_encoder` and written to the pty, an
 - **Existence check:** before attaching to a remembered project session, the plugin runs `herdr session list --json`, which drives the "session no longer exists" state.
 - The plugin only starts and ends clients. It never runs `herdr session stop` or `delete` and never stops the server.
 
-### D7. Named actions are IDE actions; the view model owns state
+### D7. Named actions live in one registry; the view model owns state
 The panel follows the MVVM split of `our-dev-conventions`:
 - `HerdrPanelView` is the Swing component and header.
 - `HerdrPanelViewModel` publishes `PanelState`: `Connecting`, `Live(session)`, `Exited(code)`, `HerdrMissing(searched)`, `SessionMissing(name)` and `UnsupportedPlatform`.
-- The view model forwards intents to one handler per interaction.
+- `HerdrPanelViewService`, a project service that lives as long as the project, holds the registry from action name to handler. The view model forwards intents to it and holds no handler body.
+- `HerdrClient` owns the running client and publishes the panel state and screen frames; the view service's handlers drive it.
 
-Each interaction is a registered `AnAction` with a stable id, so it also works from Find Action and needs no mounted screen (the handler resolves the project's view model service): `herdr.session.newProject`, `herdr.session.switchShared`, `herdr.session.switchProject`, `herdr.client.reconnect` and `herdr.settings.open`.
+Every interaction has one name and one handler in that registry:
+- Panel interactions: `herdr.session.newProject`, `herdr.session.switchShared`, `herdr.session.switchProject`, `herdr.client.reconnect`, `herdr.settings.open` and `herdr.panel.show`.
+- Capture and read-out: `herdr.panel.capture` writes a PNG of the panel to a given path; `herdr.panel.read` answers the panel state, session, size, cursor and screen text as JSON.
+
+Three routes reach the same handler:
+- the panel's own controls, through the view model;
+- a registered `AnAction` per panel interaction with the same id, so it works from Find Action and the panel header without a mounted screen;
+- the dispatcher: a `RestService` on the IDE's built-in server, `POST http://localhost:<port>/api/herdr?action=<name>&project=<name>&<arg>=<value>`. It listens on localhost only and runs as the user who runs the IDE, so a caller reaches nothing that user cannot. Acceptance runs use it to act, capture and read without clicking.
+- *Over IDE actions only:* Brian chose outside access so agents can prove the panel without screen automation.
 
 ### D8. Build, verification and release
 - **Build:** Gradle with the IntelliJ Platform Gradle Plugin 2.x. `sinceBuild = 261` with no `untilBuild`. The Plugin Verifier runs against 261 and the latest available build.
@@ -161,6 +170,6 @@ sequenceDiagram
 
 New plugin; nothing to migrate. Release flow: tag, CI builds natives and plugin, Plugin Verifier passes, publish to Marketplace. Rollback: hide or revert the Marketplace version. Herdr sessions are unaffected by plugin removal.
 
-## Open Questions
+## Resolved Questions
 
-- The Ghostty commit to pin for the first release: take the latest `main` commit whose `c-vt` examples build with Zig 0.15 on all four targets.
+- The Ghostty commit pinned for the first release is `4ae9f1a2de5484de3d6a13fe03676b8853b9c41c`. It builds with Zig 0.16 (0.15 is rejected by its build) and cross-compiles all four targets from one macOS host, so darwin targets need no macOS runner.

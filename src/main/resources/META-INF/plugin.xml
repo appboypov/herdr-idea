@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>dev.appboypov.herdr-idea</id>
+    <name>Herdr</name>
+    <vendor url="https://github.com/appboypov">De App Specialist</vendor>
+    <description><![CDATA[
+    Shows a live <a href="https://github.com/herdrdev/herdr">Herdr</a> screen in a docked tool window,
+    with terminal emulation by Ghostty's libghostty-vt.
+    While the panel has focus, keys bound in Herdr's config take precedence over IDE shortcuts.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>messages.HerdrIdeaBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Herdr" anchor="right" icon="/icons/herdr.svg"
+                    factoryClass="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrToolWindowFactory"/>
+        <applicationConfigurable parentId="tools" id="dev.appboypov.herdr-idea.settings"
+                                 instance="dev.appboypov.herdridea.herdr.shared.views.herdrsettings.HerdrSettingsPage"
+                                 key="settings.displayName"/>
+        <httpRequestHandler implementation="dev.appboypov.herdridea.herdr.shared.apis.HerdrActionRestService"/>
+    </extensions>
+
+    <actions>
+        <action id="herdr.client.reconnect" class="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrPanelAction"
+                icon="AllIcons.Actions.Refresh"/>
+        <action id="herdr.session.switchShared" class="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrPanelAction"/>
+        <action id="herdr.session.switchProject" class="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrPanelAction"/>
+        <action id="herdr.session.newProject" class="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrPanelAction"/>
+        <action id="herdr.settings.open" class="dev.appboypov.herdridea.herdr.shared.views.herdrpanel.HerdrPanelAction"
+                icon="AllIcons.General.Settings"/>
+
+        <group id="herdr.panel.sessions" popup="true" icon="AllIcons.Nodes.Folder">
+            <reference ref="herdr.session.switchShared"/>
+            <reference ref="herdr.session.switchProject"/>
+            <separator/>
+            <reference ref="herdr.session.newProject"/>
+        </group>
+        <group id="herdr.panel.header">
+            <reference ref="herdr.panel.sessions"/>
+            <reference ref="herdr.client.reconnect"/>
+        </group>
+        <group id="herdr.panel.gear">
+            <reference ref="herdr.settings.open"/>
+        </group>
+    </actions>
+</idea-plugin>

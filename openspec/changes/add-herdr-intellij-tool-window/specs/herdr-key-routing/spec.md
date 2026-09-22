@@ -37,11 +37,11 @@ While the Herdr panel has focus, Esc SHALL go to Herdr and focus SHALL stay in t
 ### Requirement: Other IDE shortcuts keep working
 While the Herdr panel has focus, a key Herdr does not bind SHALL keep its IDE meaning. When the IDE has no enabled action for that key, it SHALL go to Herdr.
 
-#### Scenario: Brian opens Find Action from the panel
+#### Scenario: Brian opens Find in Files from the panel
 - **GIVEN** the Herdr panel has focus
-- **AND** Herdr does not bind `cmd+shift+a`
-- **WHEN** Brian presses `cmd+shift+a`
-- **THEN** IntelliJ opens Find Action
+- **AND** Herdr does not bind `cmd+shift+f`
+- **WHEN** Brian presses `cmd+shift+f`
+- **THEN** IntelliJ opens Find in Files
 
 #### Scenario: Brian toggles the Project panel from the Herdr panel
 - **GIVEN** the Herdr panel has focus
