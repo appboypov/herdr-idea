@@ -34,10 +34,22 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         version = providers.gradleProperty("pluginVersion")
+        changeNotes = """
+            <p>0.1.0: first release.</p>
+            <ul>
+              <li>Herdr tool window with terminal emulation by libghostty-vt.</li>
+              <li>Keys bound in Herdr's config win over IDE shortcuts while the panel has focus.</li>
+              <li>Mouse, copy and paste; shared or per-project Herdr session.</li>
+            </ul>
+        """.trimIndent()
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild")
             untilBuild = provider { null }
         }
+    }
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+        channels = providers.environmentVariable("PUBLISH_CHANNEL").map { listOf(it) }.orElse(listOf("default"))
     }
     pluginVerification {
         ides {

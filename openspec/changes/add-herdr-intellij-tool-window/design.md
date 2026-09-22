@@ -103,7 +103,7 @@ Three routes reach the same handler:
 
 ### D8. Build, verification and release
 - **Build:** Gradle with the IntelliJ Platform Gradle Plugin 2.x. `sinceBuild = 261` with no `untilBuild`. The Plugin Verifier runs against 261 and the latest available build.
-- **Native libraries:** a CI matrix builds the four libraries with Zig (cross-compiling from Linux where the Ghostty build allows, with native macOS runners otherwise), then assembles one plugin zip and publishes it with `publishPlugin`.
+- **Native libraries:** one Linux CI job cross-compiles the four libraries with Zig, then assembles one plugin zip and publishes it with `publishPlugin`.
 - **Checks:** checks and builds run on the VPS through Crabbox (`.crabbox.yaml`, per `remote-checks`), except the steps that need a macOS host or a GUI IDE.
 
 ```mermaid

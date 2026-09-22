@@ -1,13 +1,13 @@
 ## 1. Project scaffold
 
 - [x] 1.1 Scaffold the Kotlin plugin with IntelliJ Platform Gradle Plugin 2.x: plugin id `dev.appboypov.herdr-idea`, `sinceBuild = 261` with no `untilBuild`, target IntelliJ IDEA 2026.1.2, JVM toolchain 25. Verify: `./gradlew buildPlugin` produces a zip, and `runIde` starts 2026.1.2 with the plugin listed under Installed.
-- [ ] 1.2 Add `.crabbox.yaml` per `remote-checks` and wire `./gradlew check` and `verifyPlugin`. Verify: a Crabbox run of `./gradlew check` passes on the VPS.
+- [x] 1.2 Add `.crabbox.yaml` per `remote-checks` and wire `./gradlew check` and `verifyPlugin`. Verify: a Crabbox run of `./gradlew check` passes on the VPS.
 - [x] 1.3 Add logging (`com.intellij.openapi.diagnostic.Logger`) and IDE error reporting per `our-dev-conventions` crash-reporting and logging conventions. Verify: a thrown test exception inside the plugin appears in the IDE's error reporter with the plugin named.
 
 ## 2. Native libghostty-vt build (ADR-0001)
 
 - [x] 2.1 Pin a Ghostty commit (see design Resolved Questions) and add a build script that builds `libghostty-vt` with Zig 0.16 for `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64` and `linux-aarch64` into `src/main/resources/native/<os>-<arch>/`. Verify: four libraries exist and `nm -gU` (macOS) or `nm -D` (Linux) lists `ghostty_terminal_new` in each.
-- [ ] 2.2 Add a CI workflow matrix that runs 2.1 (macOS runners for darwin targets unless the Linux cross-build works) and packs all four into one plugin zip. Verify: the CI artifact zip contains the four `native/*/` libraries.
+- [x] 2.2 Add a CI workflow that runs 2.1 on one Linux runner (Zig cross-compiles all four targets) and packs all four into one plugin zip. Verify: the CI artifact zip contains the four `native/*/` libraries.
 - [x] 2.3 Implement `NativeLibraryLoader`: select `<os>-<arch>`, extract to the plugin system dir once per library hash, load with `SymbolLookup.libraryLookup`, and report `UnsupportedPlatform` otherwise. Verify: unit test resolves the right resource for each os/arch pair and returns unsupported for `windows-x86_64`; `runIde` on this Mac loads the arm64 library.
 
 ## 3. FFM bindings (ADR-0001)
@@ -50,7 +50,7 @@
 
 ## 9. Release (plugin-distribution)
 
-- [ ] 9.1 Configure `verifyPlugin` against build 261 and the latest available IDE build, and fill the plugin description, vendor and change notes. Verify: the Plugin Verifier reports no compatibility problems.
+- [x] 9.1 Configure `verifyPlugin` against build 261 and the latest available IDE build, and fill the plugin description, vendor and change notes. Verify: the Plugin Verifier reports no compatibility problems.
 - [ ] 9.2 Smoke-test the CI plugin zip on macOS arm64 and on a Linux x64 VM with Herdr installed. Verify: the panel shows the live Herdr screen on both.
 - [ ] 9.3 Add a tag-triggered publish job using `publishPlugin` with a Marketplace token secret. Verify: a dry run (`publishPlugin` to a hidden channel) succeeds; the public release waits for Brian's approval through a BRIAN todo.
 - [ ] 9.4 Run `openspec validate add-herdr-intellij-tool-window --type change --strict` before archive. Verify: the command reports the change valid.
