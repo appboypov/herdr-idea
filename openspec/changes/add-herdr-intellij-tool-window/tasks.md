@@ -1,14 +1,14 @@
 ## 1. Project scaffold
 
-- [ ] 1.1 Scaffold the Kotlin plugin with IntelliJ Platform Gradle Plugin 2.x: plugin id `dev.appboypov.herdr-idea`, `sinceBuild = 261` with no `untilBuild`, target IntelliJ IDEA 2026.1.2, JVM toolchain 25. Verify: `./gradlew buildPlugin` produces a zip, and `runIde` starts 2026.1.2 with the plugin listed under Installed.
+- [x] 1.1 Scaffold the Kotlin plugin with IntelliJ Platform Gradle Plugin 2.x: plugin id `dev.appboypov.herdr-idea`, `sinceBuild = 261` with no `untilBuild`, target IntelliJ IDEA 2026.1.2, JVM toolchain 25. Verify: `./gradlew buildPlugin` produces a zip, and `runIde` starts 2026.1.2 with the plugin listed under Installed.
 - [ ] 1.2 Add `.crabbox.yaml` per `remote-checks` and wire `./gradlew check` and `verifyPlugin`. Verify: a Crabbox run of `./gradlew check` passes on the VPS.
-- [ ] 1.3 Add logging (`com.intellij.openapi.diagnostic.Logger`) and IDE error reporting per `our-dev-conventions` crash-reporting and logging conventions. Verify: a thrown test exception inside the plugin appears in the IDE's error reporter with the plugin named.
+- [x] 1.3 Add logging (`com.intellij.openapi.diagnostic.Logger`) and IDE error reporting per `our-dev-conventions` crash-reporting and logging conventions. Verify: a thrown test exception inside the plugin appears in the IDE's error reporter with the plugin named.
 
 ## 2. Native libghostty-vt build (ADR-0001)
 
 - [x] 2.1 Pin a Ghostty commit (see design Resolved Questions) and add a build script that builds `libghostty-vt` with Zig 0.16 for `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64` and `linux-aarch64` into `src/main/resources/native/<os>-<arch>/`. Verify: four libraries exist and `nm -gU` (macOS) or `nm -D` (Linux) lists `ghostty_terminal_new` in each.
 - [ ] 2.2 Add a CI workflow matrix that runs 2.1 (macOS runners for darwin targets unless the Linux cross-build works) and packs all four into one plugin zip. Verify: the CI artifact zip contains the four `native/*/` libraries.
-- [ ] 2.3 Implement `NativeLibraryLoader`: select `<os>-<arch>`, extract to the plugin system dir once per library hash, load with `SymbolLookup.libraryLookup`, and report `UnsupportedPlatform` otherwise. Verify: unit test resolves the right resource for each os/arch pair and returns unsupported for `windows-x86_64`; `runIde` on this Mac loads the arm64 library.
+- [x] 2.3 Implement `NativeLibraryLoader`: select `<os>-<arch>`, extract to the plugin system dir once per library hash, load with `SymbolLookup.libraryLookup`, and report `UnsupportedPlatform` otherwise. Verify: unit test resolves the right resource for each os/arch pair and returns unsupported for `windows-x86_64`; `runIde` on this Mac loads the arm64 library.
 
 ## 3. FFM bindings (ADR-0001)
 
@@ -25,7 +25,7 @@
 ## 5. Panel view and view model (design D2, D7)
 
 - [ ] 5.1 Register the `Herdr` tool window (`ToolWindowFactory`, DumbAware) with its stripe icon. Verify: `runIde` shows the Herdr stripe button; moving the panel to the right survives an IDE restart.
-- [ ] 5.2 Implement `HerdrPanelViewModel` with `PanelState` (`Connecting`, `Live`, `Exited`, `HerdrMissing`, `SessionMissing`, `UnsupportedPlatform`) and one handler per interaction. Verify: unit tests drive each state transition from fake session and locator results.
+- [x] 5.2 Implement `HerdrPanelViewModel`, which forwards each interaction by action name, and `HerdrClient`, which owns `HerdrPanelState` (`Connecting`, `Live`, `Exited`, `HerdrMissing`, `SessionMissing`, `UnsupportedPlatform`). Verify: `HerdrClientTest` drives each state transition from real stub `herdr` scripts and locator results.
 - [ ] 5.3 Implement the terminal component: paint dirty rows from `ScreenFrame` with the IDE console font, size, line spacing and scheme colours (including ANSI 16), cursor, bold, italic, underline, 24-bit colour, and wide cells per libghostty width; redraw on scheme or font change. Verify: `runIde` with Herdr live shows correct emoji, CJK and box-drawing alignment; switching Darcula to Light and font 13 to 16 redraws and Herdr relayouts.
 - [ ] 5.4 Implement the state views: `HerdrMissing` with searched paths and a settings link, `Exited` with the exit code and `Reconnect`, `SessionMissing` with create or switch-to-shared, `UnsupportedPlatform` with supported platforms. Verify: `runIde` with the herdr path set to a missing file shows the missing state; `Reconnect` after quitting Herdr's client reattaches.
 - [ ] 5.5 Add the settings page (`herdr` path override). Verify: setting a custom path is used on the next connect and persists across restarts.

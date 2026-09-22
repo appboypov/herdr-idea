@@ -67,8 +67,8 @@ class HerdrPanelViewService(private val project: Project) : Disposable {
         SHOW_PANEL to { _ -> showPanel() },
         CAPTURE to { args -> capture(args) },
         READ to { _ -> read() },
-        KEY to { args -> client.key(TerminalKeyInput.fromArgs(args)); null },
-        MOUSE to { args -> client.mouse(TerminalMouseInput.fromArgs(args)); null },
+        KEY to { args -> client.key(parsed { TerminalKeyInput.fromArgs(args) }); null },
+        MOUSE to { args -> client.mouse(parsed { TerminalMouseInput.fromArgs(args) }); null },
         PASTE to { args -> paste(args) },
         COPY to { _ -> copy() },
     )
@@ -76,6 +76,13 @@ class HerdrPanelViewService(private val project: Project) : Disposable {
     init {
         ApplicationManager.getApplication().messageBus.connect(this)
             .subscribe(EditorColorsManager.TOPIC, EditorColorsListener { refreshLook() })
+    }
+
+    /** Reads action arguments; a missing or malformed one is the caller's error, not a plugin failure. */
+    private fun <T> parsed(read: () -> T): T = try {
+        read()
+    } catch (e: IllegalArgumentException) {
+        throw HerdrActionException(e.message ?: "Invalid arguments")
     }
 
     /** Every registered action name. */

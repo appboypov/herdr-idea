@@ -1,0 +1,24 @@
+profile: herdr-idea
+sync:
+  delete: true
+  gitSeed: true
+  exclude:
+    - .cache
+    - .gradle
+    - .kotlin
+    - .intellijPlatform
+    - build
+run:
+  preflightTools:
+    - git
+    - curl
+    - java
+jobs:
+  check:
+    shell: true
+    command: scripts/build-natives.sh && ./gradlew --no-daemon --console=plain check
+    stop: auto
+  verify:
+    shell: true
+    command: scripts/build-natives.sh && ./gradlew --no-daemon --console=plain verifyPlugin
+    stop: auto
