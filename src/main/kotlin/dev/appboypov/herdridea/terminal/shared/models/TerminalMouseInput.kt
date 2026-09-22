@@ -17,7 +17,7 @@ data class TerminalMouseInput(
 ) {
     /** The input as named-action arguments. */
     fun toArgs(): Map<String, String> = buildMap {
-        put("action", action)
+        put("event", action)
         button?.let { put("button", it) }
         put("mods", mods.toString())
         put("x", x.toString())
@@ -28,7 +28,7 @@ data class TerminalMouseInput(
     companion object {
         /** The input named-action arguments describe; `x` and `y` are pixels inside the terminal area. */
         fun fromArgs(args: Map<String, String>) = TerminalMouseInput(
-            action = args["action"] ?: "PRESS",
+            action = args["event"] ?: "PRESS",
             button = args["button"],
             mods = args["mods"]?.toInt() ?: 0,
             x = requireNotNull(args["x"]) { "Missing argument: x" }.toFloat(),

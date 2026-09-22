@@ -5,6 +5,7 @@ import dev.appboypov.herdridea.ghostty.shared.enums.NativePlatform
 import dev.appboypov.herdridea.ghostty.shared.services.NativeLibraryLoader
 import dev.appboypov.herdridea.terminal.shared.models.ScreenFrame
 import dev.appboypov.herdridea.terminal.shared.models.TerminalColors
+import dev.appboypov.herdridea.terminal.shared.models.TerminalSize
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -40,8 +41,7 @@ class TerminalSessionTest {
         listOf("/bin/sh", "-c", script),
         System.getProperty("user.home"),
         System.getenv() + ("TERM" to "xterm-256color"),
-        80,
-        24,
+        TerminalSize(80, 24, 8, 16),
         TerminalColors(0xFFFFFF, 0x000000, List(16) { 0x808080 }),
         onFrame = frame::set,
         onExit = { exit.complete(it) },

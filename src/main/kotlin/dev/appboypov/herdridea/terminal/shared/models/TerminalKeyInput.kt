@@ -20,7 +20,7 @@ data class TerminalKeyInput(
 ) {
     /** The input as named-action arguments. */
     fun toArgs(): Map<String, String> = buildMap {
-        put("action", action)
+        put("event", action)
         put("key", key)
         put("mods", mods.toString())
         put("consumedMods", consumedMods.toString())
@@ -31,7 +31,7 @@ data class TerminalKeyInput(
     companion object {
         /** The input named-action arguments describe; `key` is required, the rest default to a plain press. */
         fun fromArgs(args: Map<String, String>) = TerminalKeyInput(
-            action = args["action"] ?: "PRESS",
+            action = args["event"] ?: "PRESS",
             key = requireNotNull(args["key"]) { "Missing argument: key" },
             mods = args["mods"]?.toInt() ?: 0,
             consumedMods = args["consumedMods"]?.toInt() ?: 0,

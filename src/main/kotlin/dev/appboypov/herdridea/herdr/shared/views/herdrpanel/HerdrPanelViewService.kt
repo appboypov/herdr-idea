@@ -166,6 +166,7 @@ class HerdrPanelViewService(private val project: Project) : Disposable {
             "rows" to frame?.rowCount,
             "cursor" to frame?.cursor?.let { mapOf("x" to it.x, "y" to it.y, "visible" to it.visible, "style" to it.style.name) },
             "screen" to frame?.text()?.lines(),
+            "mouseTracking" to frame?.mouseTracking,
             "selection" to view?.selectedText(),
         )
     }

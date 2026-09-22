@@ -10,6 +10,7 @@ import dev.appboypov.herdridea.terminal.shared.models.ScreenFrame
 import dev.appboypov.herdridea.terminal.shared.models.TerminalColors
 import dev.appboypov.herdridea.terminal.shared.models.TerminalKeyInput
 import dev.appboypov.herdridea.terminal.shared.models.TerminalMouseInput
+import dev.appboypov.herdridea.terminal.shared.models.TerminalSize
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -67,9 +68,11 @@ class TerminalSession private constructor(
         executor.shutdown()
     }
 
-    private fun start(vt: GhosttyVt, cols: Int, rows: Int, colors: TerminalColors, onClipboard: (String) -> Unit) {
+    private fun start(vt: GhosttyVt, size: TerminalSize, colors: TerminalColors, onClipboard: (String) -> Unit) {
         executor.submit {
-            terminal = GhosttyTerminal(vt, cols, rows, ::write, onClipboard)
+            terminal = GhosttyTerminal(vt, size.cols, size.rows, ::write, onClipboard)
+            // The mouse encoder maps pixels to cells only once it knows the cell size.
+            terminal.resize(size.cols, size.rows, size.cellWidthPx, size.cellHeightPx)
             terminal.setColors(colors.foreground, colors.background, colors.ansi.toIntArray())
         }.get()
         Thread.ofPlatform().daemon().name("Herdr pty reader").start(::readLoop)
@@ -141,8 +144,7 @@ class TerminalSession private constructor(
             command: List<String>,
             directory: String,
             environment: Map<String, String>,
-            cols: Int,
-            rows: Int,
+            size: TerminalSize,
             colors: TerminalColors,
             onFrame: (ScreenFrame) -> Unit,
             onExit: (Int) -> Unit,
@@ -152,13 +154,13 @@ class TerminalSession private constructor(
             val process = PtyProcessBuilder(command.toTypedArray())
                 .setDirectory(directory)
                 .setEnvironment(env)
-                .setInitialColumns(cols)
-                .setInitialRows(rows)
+                .setInitialColumns(size.cols)
+                .setInitialRows(size.rows)
                 .setConsole(false)
                 .start()
             val executor = Executors.newSingleThreadExecutor { Thread(it, "Herdr terminal").apply { isDaemon = true } }
             return TerminalSession(process, executor, onFrame, onExit).also {
-                it.start(vt, cols, rows, colors, onClipboard)
+                it.start(vt, size, colors, onClipboard)
             }
         }
 
