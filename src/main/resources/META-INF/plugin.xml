@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>dev.appboypov.herdr-idea</id>
-    <name>Herdr</name>
+    <name>Herdr Idea</name>
     <vendor url="https://github.com/appboypov">De App Specialist</vendor>
     <description><![CDATA[
     Shows a live <a href="https://github.com/herdrdev/herdr">Herdr</a> screen in a docked tool window,
